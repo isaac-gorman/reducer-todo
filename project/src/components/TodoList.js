@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 const ListContainer = styled.div`
-  width: 50vw;
+  width: 30vw;
   height: 100vh;
   margin: 0 auto;
   display: flex;
@@ -30,7 +30,12 @@ const TodoList = ({ taskList }) => {
       {taskList.map((item) => {
         return (
           <div>
-            <Task>{item.item}</Task>
+            <Task
+              key={item.id}
+              onClick={() => dispatch({ type: "MARK_COMPLETED" })}
+            >
+              {item.item}
+            </Task>
             <Divider />
           </div>
         );
