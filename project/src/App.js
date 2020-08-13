@@ -27,25 +27,43 @@ const Divider = styled.div`
   border: 1px solid black;
 `;
 
-const initialState = [
-  { item: "Learn about reducers", completed: false, id: 3892987589 },
-  { item: "Clean Room", completed: false, id: 377097 },
-  { item: "Exercise", completed: false, id: 49097 },
-];
+const initialState = {
+  todos: [
+    { item: "Learn about reducers", completed: false, id: 3892987589 },
+    { item: "Clean Room", completed: false, id: 377097 },
+    { item: "Exercise", completed: false, id: 49097 },
+  ],
+};
 
 const reducer = (state, action) => {
   switch (action.type) {
     case "MARK_COMPLETED":
-      return state.map((item) => {
-        if (item.id === action.payload) {
-          return {
-            ...item,
-            completed: !item.completed,
-          };
-        } else {
-          return item;
-        }
-      });
+      return {
+        ...state,
+        todos: state.todos.map((item) => {
+          return item.id === action.payload
+            ? { ...item, completed: !item.completed }
+            : item;
+        }),
+      };
+    case "ADD_TODO":
+      const newTodo = {
+        item: action.payload,
+        completed: false,
+        id: Date.now(),
+      };
+      return {
+        ...state,
+        todos: [...state.todos, newTodo],
+      };
+    // - spread the state
+    // - add new task to state with a payload
+    case "CLEAR":
+      return {
+        ...state,
+        todos: state.todos.filter((item) => !item.completed),
+      };
+
     default:
       return state;
   }
@@ -55,6 +73,16 @@ function App() {
   const [newTodo, setNewTodo] = useState("");
   const [state, dispatch] = useReducer(reducer, initialState);
   console.log("I am state", state);
+
+  const handleChange = (e) => {
+    setNewTodo(e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch({ type: "ADD_TODO", payload: newTodo });
+  };
+
   return (
     <div className="App">
       <header className="App-header">
@@ -62,11 +90,12 @@ function App() {
       </header>
 
       <ListContainer>
-        {state.map((item) => {
+        {state.todos.map((item) => {
           // console.log("I am the value of item from the map", item);
           return (
             <div>
               <Task
+                className={!item.completed ? "notCompleted" : "Completed"}
                 key={item.id}
                 onClick={() =>
                   dispatch({ type: "MARK_COMPLETED", payload: item.id })
@@ -79,6 +108,22 @@ function App() {
           );
         })}
       </ListContainer>
+
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="addNewtodo">
+          Add New Task:
+          <br />
+          <input
+            type="text"
+            name="newTodo"
+            value={newTodo}
+            placeholder="Clean Desk"
+            onChange={handleChange}
+          />
+        </label>
+        <button>Add Task</button>
+      </form>
+      <button onClick={() => dispatch({ type: "CLEAR" })}>Clear Task</button>
     </div>
   );
 }
